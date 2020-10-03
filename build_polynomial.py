@@ -14,10 +14,14 @@ def build_poly(x, degree):
     if np.ndim(x)==1:
         x = x[:,np.newaxis]
         
-    out  = np.ones((x.shape[0],1))
+    out  = x
     prev = out.copy()
-    for d in range(degree):
+    for d in range(degree-1):
         prev = prev * x
         out  = np.concatenate((out, prev), axis=1)
     # ***************************************************
     return out
+
+def add_bias(x):
+    ones = np.ones((x.shape[0],1))
+    return np.concatenate((ones,x), axis=1)
