@@ -64,13 +64,13 @@ def add_bias(x):
     return np.concatenate((ones,x), axis=1)
 
 
-def add_interaction(x,degree=1):
+def interaction(x,degree=1):
     """
     expand the features (columns) of a given matrix x
     by all the interaction terms of degree = 'degree'
     """
     #array containing all create features plus the old ones 
-    features=[x,]
+    features=[]
     for i in range(x.shape[1]):
         for j in range(x.shape[1]):
             if i>=j: #condition to avoid duplicate (xy=yx)
