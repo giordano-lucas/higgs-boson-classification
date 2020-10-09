@@ -13,9 +13,17 @@ class PolynomialExpansion:
     Object that performs polynomial feature 
     expansion and normalisation.
     """
-    def __init__(self,degree):
+    def __init__(self,degree,with_scaler=True):
         self.scaler = None
+        self.with_scaler = with_scaler
         self.degree = degree
+    
+    def scale(self,X):
+        if (self.scaler == None):           # in this case, a scaler is initialised
+            self.scaler = StandardScaler()  # fit the scaler
+            return self.scaler.fit(X)
+        else:
+            return self.scaler.transform(X) # otherwise we use the existing scaler
 
     def expand(self,X):
         """
@@ -26,11 +34,8 @@ class PolynomialExpansion:
         of X
         """
         X_poly = build_poly(X,self.degree)    # add non interaction terms
-        if (self.scaler == None):             # in this case, a scaler is initialised
-            self.scaler = StandardScaler()    # fit the scaler
-            X_poly = self.scaler.fit(X_poly)
-        else:
-            X_poly = self.scaler.transform(X_poly) # otherwise we use the existing scaler
+        if self.with_scaler:                  # if scaling is needed
+            X_poly = self.scale(X_poly)
         X_poly = add_bias(X_poly)             # add a bias column to X_poly
         return X_poly
 

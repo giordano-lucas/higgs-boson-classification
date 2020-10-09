@@ -5,6 +5,7 @@
 # ============================================================
 from abc import ABC, abstractmethod
 import numpy as np
+from numpy.lib.shape_base import hsplit
 
 class Scaler(ABC):
     """
@@ -39,6 +40,8 @@ class Scaler(ABC):
         """
         pass
 
+    def __init__(self,has_bias=False):
+        self.correct_bias = (1 if has_bias else 0)
 # ============================================================
 # ===================  Sub Classes ===========================
 # ============================================================
@@ -48,13 +51,15 @@ class StandardScaler(Scaler):
     Standard Scaler that returns a matrix with 0-mean columns 
     and 1-std columns.
     """
+   
     def fit(self,x):
-        self.mean = np.mean(x,axis=0)
-        self.std  = np.std(x,axis=0)
+        self.mean = np.mean(x[:,self.correct_bias:],axis=0)
+        self.std  = np.std(x[:,self.correct_bias:],axis=0)
         return self.transform(x)
 
     def transform(self, x):
-        return (x-self.mean)/self.std
+        x[:,self.correct_bias:] = (x[:,self.correct_bias:]-self.mean)/self.std
+        return x
 
 class MinMaxScaler(Scaler):
     """
@@ -62,9 +67,13 @@ class MinMaxScaler(Scaler):
     the formula : (x-min)/(max-min)
     """
     def fit(self,x):
+        x_t = self.correct_bias(x)
         self.min = np.min(x,axis=0)
         self.max = np.max(x,axis=0)
         return self.transform(x)
 
     def transform(self, x):
-        return (x-self.min)/(self.max-self.min)
+        x_t = self.correct_bias(x)
+        x_t = self.correct_bias(x)
+        x_t = (x_t-self.min)/(self.max-self.min)
+        return x #since x_t is a view on x
