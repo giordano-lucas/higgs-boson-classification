@@ -46,12 +46,13 @@ def do_cross_validation(k,k_fold_ind,X,y,params,_CACHE_):
     cv_X_tr = scaler.fit(cv_X_tr)
     cv_X_te = scaler.transform(cv_X_te)
     m = np.mean(cv_X_tr,axis=0)
-    print(np.all(m[1:]<1e-4))
     #print("---------------------------------")
     #fit on train set
     w,loss_tr = ridge_regression(cv_y_tr,cv_X_tr,params['lambda'])
+    
     #get loss for val
     loss_te = compute_loss(cv_y_te,cv_X_te,w)
+    #print('loss tr',loss_tr, 'loss te',np.sqrt(2*loss_te))
     return np.sqrt(2*loss_te)
 
 def grid_search_cv(params,X,y,k_fold=5):
@@ -72,9 +73,9 @@ def grid_search_cv(params,X,y,k_fold=5):
     # cache if needed by do_cross_validation
     _CACHE_ = {}
     for i, p in enumerate(param_grid.generate()):
-        loss = np.zeros(k_fold)
+        loss = []
         for k in range(k_fold):
-            loss[k] = do_cross_validation(k,fold_ind,X,y,p,_CACHE_)
+            loss.append(do_cross_validation(k,fold_ind,X,y,p,_CACHE_))
         grid_mean[i] = np.mean(loss)
         print('Evaluated for {0} : loss = {1}'.format(p,grid_mean[i]))
     # reshape in the proper dimension of search space
