@@ -8,6 +8,29 @@ from implementations import *
 from build_polynomial import PolynomialExpansion
 from Scaler import StandardScaler
 
+#================================================================
+#======================= Helper Class ===========================
+#================================================================
+class ParameterGrid:
+    def __init__(self,params):
+        self.params = params
+        self.len    = np.prod(np.array([len(v) for v in params.values()]))
+    def __len__(self):
+        return self.len
+    def get(self,index):
+        res = {}
+        for i,key in enumerate(self.params.keys()):
+            res[key] = self.params[key][index[i]]
+        return res
+
+    def generate(self):
+        keys = self.params.keys()
+        vals = self.params.values()
+        for instance in product(*vals):
+            yield dict(zip(keys, instance))
+#================================================================
+#==================== Cross Validation ==========================
+#================================================================
 def fold_indices(num_examples,k_fold=2):
     ind = np.arange(num_examples)
     split_size = num_examples//k_fold
@@ -29,13 +52,12 @@ def do_cross_validation(k,k_fold_ind,X,y,params,_CACHE_):
         X_t      = expanser.expand(X)
         _CACHE_.clear()             # clear dict to save memory
         _CACHE_[degree] = X_t     # add to cache for the next iterations
-    #print("*********************************")
     #******************
     # use one split to test 
-    test_ind = k_fold_ind[k]
+    test_ind  = k_fold_ind[k]
     # use k-1 split to train
-    train_splits = [i for i in range(k_fold_ind.shape[0]) if i is not k]
-    train_ind    = k_fold_ind[train_splits,:].reshape(-1)
+    train_ind = k_fold_ind[np.arange(k_fold_ind.shape[0]) != k]
+    train_ind = k_fold_ind.reshape(-1)
     # get train and val
     cv_X_tr = X_t[train_ind,:]
     cv_y_tr = y[train_ind]
@@ -45,13 +67,11 @@ def do_cross_validation(k,k_fold_ind,X,y,params,_CACHE_):
     scaler = StandardScaler(has_bias=True)
     cv_X_tr = scaler.fit(cv_X_tr)
     cv_X_te = scaler.transform(cv_X_te)
-    m = np.mean(cv_X_tr,axis=0)
-    #print("---------------------------------")
     #fit on train set
     w,loss_tr = ridge_regression(cv_y_tr,cv_X_tr,params['lambda'])
     
     #get loss for val
-    loss_te = compute_loss(cv_y_te,cv_X_te,w)
+    loss_te = loss_least_squares(cv_y_te,cv_X_te,w)
     #print('loss tr',loss_tr, 'loss te',np.sqrt(2*loss_te))
     return np.sqrt(2*loss_te)
 
@@ -95,20 +115,56 @@ def get_best_params(grid_mean,param_grid,verbose=True):
         print('======== Best test loss score {} ========'.format(best_score))
     return best_params
 
-class ParameterGrid:
-    def __init__(self,params):
-        self.params = params
-        self.len    = np.prod(np.array([len(v) for v in params.values()]))
-    def __len__(self):
-        return self.len
-    def get(self,index):
-        res = {}
-        for i,key in enumerate(self.params.keys()):
-            res[key] = self.params[key][index[i]]
-        return res
+#================================================================
+#=================== Non Cross Validation =======================
+#================================================================
 
-    def generate(self):
-        keys = self.params.keys()
-        vals = self.params.values()
-        for instance in product(*vals):
-            yield dict(zip(keys, instance))
+def train_test_split(X,y,train_ratio=0.67,seed=43):
+    """
+    split the dataset based on the split ratio. If ratio is 0.8 
+    you will have 80% of your data set dedicated to training 
+    and the rest dedicated to testing
+    """
+    np.random.seed(seed)                # set seed
+    N = X.shape[0]                      # number of data points 
+    indices = np.arange(N)              # all row indices
+    np.random.shuffle(indices)          # shuffle indices
+    split_index=int(N*train_ratio)      # last training point 
+    mask_tr = indices[:split_index]     # mask for training set
+    mask_te = indices[split_index:]     # mask for testing set
+
+    return X[mask_tr],y[mask_tr],X[mask_te],y[mask_te]
+
+def hyper_parameter_optimisation(params,X,y):
+    train_set,train_target,test_set,test_target = train_test_split(X,y,train_ratio=0.67)
+    # generator on the cartesian product of params
+    param_grid = ParameterGrid(params) 
+    #save the values for the combination of hyperparameters
+    losses = np.zeros(len(param_grid)) 
+    #parameters
+    old_deg  = None
+    expanser = None  # create object for polynomial expansion
+    x_tr = None      # expand the training set
+    x_te = None      # expand the test set
+    y_tr = train_target  # renaming for consistency
+    y_te = test_target   # renaming for consistency
+    for i, p in enumerate(param_grid.generate()):
+        degree = p['degree']
+        if old_deg is None or old_deg != degree:
+            expanser = PolynomialExpansion(degree,with_interractions=True)  # create object for polynomial expansion
+            x_tr = expanser.expand(train_set)       # expand the training set
+            x_te = expanser.expand(test_set)        # expand the test set
+            old_deg = degree
+        #fit on train set
+        #w,loss_tr = ridge_regression(y_tr,x_tr,p['lambda'])
+        w,loss_tr  = reg_logistic_regression(y_tr,x_tr,
+            lambda_=p['lambda'],initial_w=np.zeros((x_tr.shape[1])),max_iters=50,gamma=p['gamma'])
+        #get loss for val
+        loss = loss_least_squares(y_te,x_te,w)
+        losses[i] = np.sqrt(2*loss)
+        print('Evaluated for {0} : loss = {1}'.format(p,losses[i]))
+    # reshape in the proper dimension of search space
+    if len(params.keys())>1:
+        search_dim = tuple([len(p) for _,p in params.items()])
+        losses  = losses.reshape(search_dim)
+    return get_best_params(losses,param_grid)
