@@ -20,11 +20,12 @@ def gradient_descent(y, tx, initial_w,max_iters, gamma,compute_loss,compute_grad
     """
     w=initial_w
     for n_iter in range(max_iters):
+        
         grd=compute_gradient(y,tx,w)
         w=w-gamma*grd
         loss=compute_loss(y,tx,w)
-        #if n_iter % 100 == 0:
-            #print("Current iteration = {i}, loss={l}".format(i=n_iter, l=loss))
+        if n_iter % 500 == 0:
+            print("Current iteration = {i}, loss={l}".format(i=n_iter, l=loss))
     loss=compute_loss(y,tx,w)
     return w,loss
 
@@ -93,7 +94,7 @@ def reg_logistic_regression(y,tx,lambda_,initial_w,max_iters,gamma):
     return gradient_descent(
         y, tx, initial_w,max_iters, gamma,
         lambda y,tx,w: loss_reg_logistic_regression(y,tx,w,lambda_),
-        lambda y,tx,w: gradient_reg_loss_logistic_regression(y,tx,w,lambda_))
+        lambda y,tx,w: gradient_reg_logistic_regression(y,tx,w,lambda_))
 
 #===================== Hepler functions =========================
 
@@ -106,7 +107,7 @@ def loss_logistic_regression(y, tx, w):
     z = tx@w
     return np.sum(np.log(1+np.exp(z))-y*z)
 
-def gradient_loss_logistic_regression(y, tx, w):
+def gradient_logistic_regression(y, tx, w):
     """compute the gradient of loss."""
     return tx.T@(sigmoid(tx@w) - y)
 
@@ -115,7 +116,7 @@ def loss_reg_logistic_regression(y, tx, w,lambda_):
     norm = (1/2)*lambda_*np.sum(w**2) # norm of w 
     return loss_logistic_regression(y,tx,w)+norm
 
-def gradient_reg_loss_logistic_regression(y, tx, w,lambda_):
+def gradient_reg_logistic_regression(y, tx, w,lambda_):
     """compute the gradient of loss."""
     grad_norm = lambda_*w # gradient of the normal w
-    return loss_logistic_regression(y,tx,w)+grad_norm
+    return gradient_logistic_regression(y,tx,w)+grad_norm

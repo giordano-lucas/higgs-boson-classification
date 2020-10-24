@@ -158,13 +158,22 @@ def hyper_parameter_optimisation(params,X,y):
         #fit on train set
         #w,loss_tr = ridge_regression(y_tr,x_tr,p['lambda'])
         w,loss_tr  = reg_logistic_regression(y_tr,x_tr,
-            lambda_=p['lambda'],initial_w=np.zeros((x_tr.shape[1])),max_iters=50,gamma=p['gamma'])
+            lambda_=p['lambda'],initial_w=np.zeros((x_tr.shape[1])),max_iters=2000,gamma=p['gamma'])
         #get loss for val
-        loss = loss_least_squares(y_te,x_te,w)
-        losses[i] = np.sqrt(2*loss)
+        
+        #loss = loss_least_squares(y_te,x_te,w)
+        losses[i] = logistic_accuracy(y_te,x_te,w)
+        
         print('Evaluated for {0} : loss = {1}'.format(p,losses[i]))
     # reshape in the proper dimension of search space
     if len(params.keys())>1:
         search_dim = tuple([len(p) for _,p in params.items()])
         losses  = losses.reshape(search_dim)
     return get_best_params(losses,param_grid)
+
+
+
+def logistic_accuracy(y,X,w):
+    sigm=sigmoid(X@w)
+    pred = [ 0 if x<0.5 else 1 for x in sigm]
+    return np.sum(y==pred)/len(y)
