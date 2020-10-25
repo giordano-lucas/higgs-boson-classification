@@ -19,7 +19,7 @@ params={'degree':degrees,'lambda':lambdas}
 # cross validation based on accuracy instead of loss
 def error(y,X,w):
     """mean prediction error"""
-    pred = predict_labels(X,w)
+    pred = predict_labels(w,X)
     return np.mean(y!=pred)
 # call to the grid search function
 best_param = grid_search_cv(

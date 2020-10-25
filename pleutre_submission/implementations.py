@@ -141,6 +141,7 @@ def to_dataset_labels(y):
     o[o==0] = -1
     return o
 def predict_labels_logistic_regression(y, X, w):
+    """ Prediction method for logistic regression"""
     pred = sigmoid(X@w) > 0.5
     pred = to_dataset_labels(pred)
     return pred
