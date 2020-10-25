@@ -28,7 +28,7 @@ In the file ```missing_values.py```, we can find two classes in charge of this p
 
 * MeanInterpolator: for each feature, the missing values are interpolated to 
     the mean of the feature. 
-* LinearInterpolator: For each feature $c$ that contains missing value the we train a simple least squares task to predict the missing values. We set the target variable $y$ to be equal to $c$, letting $X$ to be all the columns of the higgs dataset expect $c$. In this process we droped the actual label column in the dataset so that the procedure could also be applied to fill the missing values for the submission dataset, for which the labels are not available. The next step is to split $y$ and $X$ into a training and test set according to the missing values in $c$. To do so, we define the following mask: $mask_i = I\{y_i = -999\}$. We have:
+* LinearInterpolator: For each feature $c$ that contains missing value the we train a simple least squares task to predict the missing values. We set the target variable $y$ to be equal to $c$, letting $X$ to be all the columns of the higgs dataset except $c$. In this process we droped the actual label column in the dataset so that the procedure could also be applied to fill the missing values for the submission dataset, for which the labels are not available. The next step is to split $y$ and $X$ into a training and test set according to the missing values in $c$. To do so, we define the following mask: $mask_i = I\{y_i = -999\}$. We have:
 
      * $y_{test} = y[mask]$
      * $y_{train} = y[~mask]$
@@ -106,7 +106,7 @@ calls itself the method
 def do_cross_validation(k,k_fold_ind,X,y,params,_CACHE_,model,loss_ft):
     ...
 ```
-which is responible of training a model for a specific combination of hyperparameter and a specific fold of the dataset. This method also has the option to cache some results in order to speed up the computation. In our code this is used to avoid the costly compution of the feature expansion for a given degree when it was already computed before.
+which is responible of training a model for a specific combination of hyperparameter and a specific fold of the dataset. This method also has the option to cache some results in order to speed up the computation. In our code this is used to avoid the costly computation of the feature expansion for a given degree when it was already computed before.
 
 Regarding data transformation this method performs the train/test split, the polynomial expansion and the normalisation.
 
@@ -130,4 +130,4 @@ best_param = grid_search_cv(
     loss_ft=error)
 ```
 
-We defined the ```error``` function as the complement of the accuracy. Since we are in a classification setting and that our model is judged on its accuracy, it makes sense to do choose the best set of hyperparameters using this metric instead of the root mean square error. In the code, our search space and the number of folds can be found.
+We defined the ```error``` function as the complement of the accuracy. Since we are in a classification setting and that our model is judged on its accuracy, it makes sense to choose the best set of hyperparameters using this metric instead of the root mean square error. In the code, our search space and the number of folds can be found.
