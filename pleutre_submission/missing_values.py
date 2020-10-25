@@ -9,8 +9,8 @@ from abc import ABC, abstractmethod
 
 class Interpolator(ABC):
     """
-    Abstract class that defines an interpolator for
-    the missing values.
+    Abstract class that definies a scaler : a function that 
+    'normalises' the data according to some function.
     """
     @staticmethod
     def isnan(X,NAN_ENCODING=-999):
@@ -28,12 +28,6 @@ class Interpolator(ABC):
 # ===================  Sub Classes ===========================
 # ============================================================
 class MeanInterpolator(Interpolator):
-    """
-    Interpolator for missing values:
-    
-    For each feature, the missing values are interpolated to 
-    the mean of the feature. 
-    """
     def __init__(self):
         self.means = None
     def interpolate(self,X):
@@ -50,23 +44,6 @@ class MeanInterpolator(Interpolator):
         return X
 
 class LinearInterpolator(Interpolator):
-    """
-    Interpolator for missing values:
-    
-    For each feature 'c' that contains missing value the following procedure is 
-    applied :
-        - data is a mean-interpolated version of the dataset (named array). This
-        is used to augment the training set size.
-        - The column 'c' is used as the dependent variable in the least squares
-        setting and the remaining ones define the independent variables.
-        - data is splitted into a training/test set : all the missing values go 
-        into the test set and the remaining ones into the training set. The
-        idea is to use the existing values to predict the missing ones.
-        - a simple least squares model is fitted on the training set
-        - missing values are predict based on the model. 
-    Note that the weights are only computed the first time that the method is 
-    called, after that the prediction are based on the previously computed weights.
-    """
     def __init__(self):
         self.weights  = None
         self.nan_cols = None
