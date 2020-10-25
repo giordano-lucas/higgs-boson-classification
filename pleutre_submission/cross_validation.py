@@ -57,22 +57,6 @@ class ParameterGrid:
 #==================== Helper functions ==========================
 #================================================================
 
-def train_test_split(X,y,train_ratio=0.67,seed=43):
-    """
-    split the dataset based on the split ratio. If ratio is 0.8 
-    you will have 80% of your data set dedicated to training 
-    and the rest dedicated to testing
-    """
-    np.random.seed(seed)                # set seed
-    N = X.shape[0]                      # number of data points 
-    indices = np.arange(N)              # all row indices
-    np.random.shuffle(indices)          # shuffle indices
-    split_index=int(N*train_ratio)      # last training point 
-    mask_tr = indices[:split_index]     # mask for training set
-    mask_te = indices[split_index:]     # mask for testing set
-
-    return X[mask_tr],y[mask_tr],X[mask_te],y[mask_te]
-
 def fold_indices(num_examples,k_fold):
     """Computes the k_fold set of indices"""
     ind = np.arange(num_examples)
@@ -133,7 +117,7 @@ def do_cross_validation(k,k_fold_ind,X,y,params,_CACHE_,model,loss_ft):
     loss_te = loss_ft(cv_y_te,cv_X_te,w)
     return loss_te
 
-def grid_search_cv(params,X,y,k_fold=5,model=cross_val_ridge_regression,loss_ft=rmse):
+def grid_search_cv(params,X,y,k_fold=15,model=cross_val_ridge_regression,loss_ft=rmse):
     '''
     Grid Search Function
     @param params   : (dict) dictionary of search params. ex:{'param1':[1,2,..,4],'param2':[6,7]}

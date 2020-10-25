@@ -13,7 +13,7 @@ y, X, ids = load_csv_data(DATA_TRAIN_PATH)
 interpolator = LinearInterpolator()
 X = interpolator.interpolate(X)
 # hyperparameter search space
-degrees = np.arange(1,9)
+degrees = np.arange(1,12)
 lambdas = np.logspace(-4, 2, 10)
 params={'degree':degrees,'lambda':lambdas}
 # cross validation based on accuracy instead of loss

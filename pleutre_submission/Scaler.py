@@ -63,7 +63,7 @@ class StandardScaler(Scaler):
 
 class MinMaxScaler(Scaler):
     """
-    Standard Scaler that returns a matrix scaler according to
+    Scaler that returns a matrix scaler where the columns were normalised according to
     the formula : (x-min)/(max-min)
     """
     def fit(self,x):
