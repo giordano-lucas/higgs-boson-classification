@@ -87,7 +87,7 @@ def logistic_regression(y,tx,initial_w,max_iters,gamma):
     return gradient_descent(
         y, tx, initial_w,max_iters, gamma,
         loss_logistic_regression,
-        gradient_loss_logistic_regression)
+        gradient_logistic_regression)
 
 def reg_logistic_regression(y,tx,lambda_,initial_w,max_iters,gamma):
     """Logistic regression with stochastic gradient descent"""
