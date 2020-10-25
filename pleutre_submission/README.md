@@ -10,7 +10,11 @@
     * build_polynomial.py
     * cross_validation.py 
 
-3. Note that in the context of logistic regression, the methods computing the loss and gradient all suppose that the variable ```y``` is such that  $\forall_i \; y_i \in \{0,1\}$. Since the higgs dataset labels are in the set $\{-1,1\}$, we decided to map $-1$ into $0$ in the following functions. Note that they can also be called with labels in $\{0,1\}$ and they will work correcly
+3. Note that in the context of logistic regression, the methods computing the loss and gradient all suppose that the variable ```y``` is such that 
+```math
+\forall_i \; y_i \in \{0,1\}
+```
+Since the higgs dataset labels are in the set $\{-1,1\}$, we decided to map $-1$ into $0$ in the following functions. Note that they can also be called with labels in $\{0,1\}$ and they will work correcly
 ```python
 def logistic_regression(y,tx,initial_w,max_iters,gamma):
     """Logistic regression with gradient descent"""
