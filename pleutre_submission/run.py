@@ -25,7 +25,8 @@ def error(y,X,w):
 best_param = grid_search_cv(
     params,
     X,y,
-    k_fold=10,
+    k_fold=15,
+    model=cross_val_ridge_regression,
     loss_ft=error)
 # create optimal model 
 expanser = PolynomialExpansion(
