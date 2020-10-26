@@ -9,26 +9,36 @@ DIRECTIORY = 'data/'
 # data loading
 DATA_TRAIN_PATH = DIRECTIORY + 'train.csv' 
 y, X, ids = load_csv_data(DATA_TRAIN_PATH)
-
 # missing value interpolation
 interpolator = LinearInterpolator()
 X = interpolator.interpolate(X)
-
-# create optimal model (found by the script 'run_cv.py')
-best_param = {'degree':18,'lambda':3.1622776601683795e-09}
+# hyperparameter search space
+degrees = np.arange(1,20)
+lambdas = np.concatenate(([0],np.logspace(-10, -7, 3)))
+params={'degree':degrees,'lambda':lambdas}
+# cross validation based on accuracy instead of loss
+def error(y,X,w):
+    """mean prediction error"""
+    pred = predict_labels(w,X)
+    return np.mean(y!=pred)
+# call to the grid search function
+best_param = grid_search_cv(
+    params,
+    X,y,
+    k_fold=15,
+    model=cross_val_ridge_regression,
+    loss_ft=error)
+# create optimal model 
 expanser = PolynomialExpansion(
     best_param['degree'],
     with_interractions=True,
     with_scaler=True)
-# expansion + scaling
-tX = expanser.expand(X) 
+tX = expanser.expand(X) # expansion + scaling
 # compute the weights
 weights,loss_tr = ridge_regression(y,tX,best_param['lambda'])
-
 # load test set
 DATA_TEST_PATH = DIRECTIORY + 'test.csv' 
 y_sub, X_sub, ids_sub = load_csv_data(DATA_TEST_PATH)
-
 # apply the same tranformation pipeline to the test set
 Xt_sub = interpolator.interpolate(X_sub)
 Xt_sub = expanser.expand(Xt_sub)

@@ -20,6 +20,9 @@ def reg_logistic_regression(y,tx,lambda_,initial_w,max_iters,gamma):
     """Logistic regression with stochastic gradient descent"""
     ...
 ```
+## Reproducibility
+
+The code provided in the script ```run.py``` will produce the same submission published on AIcrowd. However, it does not contain any cross-validation set up (due to time constrains) but rather trains a model using the best hyperparameters found by the script ```run_cv.py```. In that sense, if you have several hours and you want to test our cross-validation procedure, please run the script ```run_cv.py``` instead.  
 
 ##  Data preparation
 
@@ -110,7 +113,7 @@ which is responible of training a model for a specific combination of hyperparam
 
 Regarding data transformation this method performs the train/test split, the polynomial expansion and the normalisation.
 
-In the ```run.py``` script the code associated to the cross validation is the following
+In the ```run_cv.py``` script the code associated to the cross validation is the following
 ```python
 # hyperparameter search space
 degrees = np.arange(1,12)
@@ -132,6 +135,3 @@ best_param = grid_search_cv(
 
 We defined the ```error``` function as the complement of the accuracy. Since we are in a classification setting and that our model is judged on its accuracy, it makes sense to choose the best set of hyperparameters using this metric instead of the root mean square error. In the code, our search space and the number of folds can be found.
 
-## Reproducibility
-
-The code provided in the script ```run.py``` will produce 
