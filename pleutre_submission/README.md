@@ -131,3 +131,7 @@ best_param = grid_search_cv(
 ```
 
 We defined the ```error``` function as the complement of the accuracy. Since we are in a classification setting and that our model is judged on its accuracy, it makes sense to choose the best set of hyperparameters using this metric instead of the root mean square error. In the code, our search space and the number of folds can be found.
+
+## Reproducibility
+
+The code provided in the script ```run.py``` will produce 
